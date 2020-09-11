@@ -1,0 +1,110 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: > 
+  "Bucket to store Terraform state. This could be further used for storing multiple state files for various
+  environments, accounts, etc. But for now we assume single account/single state file.
+  "
+
+Parameters:
+  TerraformUser:
+    Type: "String"
+    Description: "Terrafrom admin user"
+
+Resources:
+  StateBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: Transition90days365daysRetain7yrs
+            Status: Enabled
+            ExpirationInDays: 2555
+            Transitions:
+              - TransitionInDays: 365
+                StorageClass: GLACIER
+              - TransitionInDays: 90
+                StorageClass: STANDARD_IA               
+      Tags:
+        - Key: Owner
+          Value: 'tyermolenko'
+        - Key: Scope
+          Value: 'global'
+        - Key: Purpose
+          Value: 'terraform state backend'
+        - Key: SafeToDelete
+          Value: 'No' 
+      
+  StateBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StateBucket
+      PolicyDocument:
+        Statement:
+        - Sid: Enforce HTTPS Connections
+          Action: s3:*
+          Effect: Deny
+          Principal: '*'
+          Resource: !Sub
+            - arn:aws:s3:::${StateBucket}/*
+            - { StateBucket: !Ref StateBucket }
+          Condition:
+            Bool:
+              aws:SecureTransport: false
+        
+        - Sid: Restrict Delete Actions
+          Action: s3:Delete*
+          Effect: Deny
+          Principal: '*'
+          Resource: !Sub
+            - arn:aws:s3:::${StateBucket}/*
+            - { StateBucket: !Ref StateBucket }
+  
+  TerraformLockTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "TerraformLockTable"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 10
+        WriteCapacityUnits: 10
+      AttributeDefinitions:
+        - AttributeName: "LockID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "LockID"
+          KeyType: "HASH"
+      Tags:
+        - Key: Owner
+          Value: 'tyermolenko'
+        - Key: Purpose
+          Value: 'Terraform State file lock'
+
+  TerraformStateManagementPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Users: 
+        - !Ref TerraformUser
+      PolicyName: TerraformStateManagementPolicy
+      PolicyDocument:
+        Statement:
+          - Sid: TerraformS3Access
+            Effect: Allow
+            Action: 
+              - s3:ListBucket
+              - s3:GetObject
+              - s3:PutObject
+            Resource: 
+              - !Sub
+                - arn:aws:s3:::${StateBucket}
+                - { StateBucket: !Ref StateBucket }
+              - !Sub
+                - arn:aws:s3:::${StateBucket}/*
+                - { StateBucket: !Ref StateBucket }
+          - Sid: DynamoDBAccess
+            Effect: Allow
+            Action: 
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:DeleteItem
+            Resource: !GetAtt TerraformLockTable.Arn

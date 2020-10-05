@@ -15,6 +15,9 @@ locals  {
 # VPC with default settings and passed-in CIDR block
 resource "aws_vpc" "this" {
     cidr_block = var.cidr
+    tags = {
+        "Name" = "${var.tenant}-vpc-${var.environment}"
+    }
 }
 
 # Provision a DMZ subnet in every availability zone

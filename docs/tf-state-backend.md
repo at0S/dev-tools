@@ -17,4 +17,3 @@ To use S3 as a backend we will need:
 5. Policy for this table
 
 I think it is a bit ironic, as I'm managing above mentioned resources with CloudFormation. 
-

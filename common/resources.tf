@@ -1,12 +1,23 @@
-data "aws_availability_zones" "available" {
-  state = "available"
+module "vpc-ifm-tools-sydney" {
+  source = "../terraform/modules/vpc-v1"
+
+  cidr        = "10.200.0.0/16"
+  environment = "production"
+  tenant      = "ifm"
+
+  providers = {
+    aws = aws.ap-southeast-2
+  }
 }
 
-resource "aws_vpc" "ifm-tools" {
-  cidr_block = "10.110.0.0/16"
-  tags = {
-    Name          = "ifm-tools-apse2"
-    Owner         = "tyermolenko"
-    ProvisionedBy = "terrafrom"
+module "vpc-ifm-tools-singapore" {
+  source = "../terraform/modules/vpc-v1"
+
+  cidr        = "10.100.0.0/16"
+  environment = "production"
+  tenant      = "ifm"
+
+  providers = {
+    aws = aws.ap-southeast-1
   }
 }

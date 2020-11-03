@@ -1,0 +1,27 @@
+#resource "kubernetes_persistent_volume_claim" "nexus-pvc" {
+#  depends_on = [kubernetes_manifest.nexus-pv]
+#  metadata {
+#    name = "nexus-pvc"
+#  }
+#  spec {
+#    access_modes = ["ReadWriteMany"]
+#    resources {
+#      requests = {
+#        storage = "5Gi"
+#      }
+#    }
+#    volume_name = "nexus-pv"
+#  }
+#}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nexus-pvc
+spec:
+    storageClassName: "efs-sc"
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            storage: 5G

@@ -1,0 +1,22 @@
+# Nexus is using the ALB ingress controller. Not very portable and 
+# requires AWS ALB controller to be functional
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Out for now
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/tags: Environment=development,owner=Architecture
+spec:
+  rules:
+  - host: nexus.infomedia.systems
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nexus-service
+          servicePort: 80

@@ -1,0 +1,27 @@
+# Batch job to test the RBAC with K8s as OIDC identity provider.
+# We have permissions to read from S3 so that must succeedd
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aws-cli-test
+spec:
+  template:
+    metadata:
+      labels:
+        app: eks-iam-test
+    spec:
+      serviceAccountName: aws-iam-test
+      containers:
+        # Good, permissions to S3 are set
+      - name: aws-iam-test-s3
+        image: amazon/aws-cli:latest
+        args: ["s3", "ls"]
+        # Broken, no EC2 permissions granted
+      - name: aws-iam-test-ec2
+        image: amazon/aws-cli:latest
+        args: ["ec2", "describe-instances", "--region", "ap-southeast-2"]
+        # Good, we have a valid role, so should be able to call STS to get own properties
+      - name: aws-iam-test-sts
+        image: amazon/aws-cli:latest
+        args: ["sts", "get-caller-identity"]
+      restartPolicy: Never

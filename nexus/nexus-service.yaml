@@ -1,0 +1,28 @@
+#resource "kubernetes_service" "nexus-oss" {
+#  metadata {
+#    name = "nexus-service"
+#  }
+#  spec {
+#    selector = {
+#      App = kubernetes_deployment.nexus-oss.spec.0.template.0.metadata[0].labels.App
+#    }
+#    port {
+#      port        = 80
+#      target_port = 8081
+#    }
+#    type = "NodePort"
+#  }
+#}
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-service
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 8081
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: nexus

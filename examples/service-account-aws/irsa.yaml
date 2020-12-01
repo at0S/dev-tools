@@ -1,0 +1,13 @@
+# Service account to assume a role in AWS
+# So that the pod can interact with AWS APIs
+
+# The role is assumable from the OIDC we configured as IdentityProvider in IAM
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::172173733067:role/aws-iam-test
+  labels:
+    app.kubernetes.io/name: aws-iam-test
+  name: aws-iam-test

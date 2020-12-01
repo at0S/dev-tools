@@ -1,0 +1,119 @@
+#resource "kubernetes_deployment" "nexus-oss" {
+#  metadata {
+#    name = "nexus-oss"
+#    labels = {
+#      App     = var.application
+#      Env     = var.environment
+#      Version = var.ver
+#    }
+#  }
+#
+#  spec {
+#    replicas = 1
+#    selector {
+#      match_labels = {
+#        App = var.application
+#      }
+#    }
+#    template {
+#      metadata {
+#        labels = {
+#          App = var.application
+#        }
+#      }
+#      spec {
+#        # Assumes we have a special type of node to run nexus TODO: must be more generic
+#        node_selector = {
+#          "Environment" = "nexus"
+#        }
+#
+#        volume {
+#          name = "nexus-data"
+#          persistent_volume_claim {
+#            claim_name = kubernetes_persistent_volume_claim.nexus-pvc.metadata.0.name
+#          }
+#        }
+#
+#        container {
+#          image = var.nexus-image-tag
+#          name  = var.application
+#          env {
+#            name  = "MAX_HEAP"
+#            value = "800m"
+#          }
+#          env {
+#            name  = "MIN_HEAP"
+#            value = "300m"
+#          }
+#          env {
+#            name = "NEXUS_SECURITY_RANDOMPASSWORD"
+#            value = "false"
+#          }
+#          volume_mount {
+#            name = "nexus-data"
+#            mount_path = "/nexus-data"
+#            }
+#          port {
+#            container_port = 8081
+#          }
+#          resources {
+#            limits {
+#              cpu    = "1000m"
+#              memory = "4G"
+#            }
+#            requests {
+#              cpu    = "500m"
+#              memory = "2G"
+#            }
+#          }
+#        }
+#      }
+#    }
+#  }
+#}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  namespace: default
+  labels: 
+    app: nexus
+    Environment: production
+    Version: "0.2"
+spec:
+  selector:
+    matchLabels:
+      app: nexus
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      nodeSelector:
+        Environment: nexus
+      containers:
+        - image: sonatype/nexus3:3.28.1
+          name: nexus
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - mountPath: /nexus-data
+              name: nexus-data-volume
+          env:
+            - name: MAX_HEAP
+              value: "800m"
+            - name: MIN_HEAP
+              value: "300m"
+          resources:
+            limits: 
+              memory: "4G"
+              cpu: "4000m"
+            requests:
+              memory: "2G"
+              cpu: 500m
+      volumes:
+        - name: nexus-data-volume
+          persistentVolumeClaim:
+            claimName: nexus-pvc

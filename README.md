@@ -25,5 +25,8 @@ I plan to have services in a single AWS account, most probably in the single VPC
 ```
 But that is work in progress, just starting out.
 
+## Commit signatures
+I finally started to use my new Yubikey 5, so its time to sign commits
+
 ## CI/CD
 Yes, with GitHub Actions I think, how it will work - TBA. Will it use TerraformCloud? Meh, but - will see. For the context, we can keep our state file there (which is handy), it also provides `terraform` runners. Don't really want to exercise that for now.

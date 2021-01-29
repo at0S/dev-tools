@@ -94,7 +94,7 @@ spec:
       nodeSelector:
         Environment: nexus
       containers:
-        - image: sonatype/nexus3:3.28.1
+        - image: sonatype/nexus3:3.29.2
           name: nexus
           ports:
             - containerPort: 8081

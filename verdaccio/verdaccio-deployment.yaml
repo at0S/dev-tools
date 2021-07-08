@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verdaccio
+  namespace: default
+  labels: 
+    app: verdaccio
+    Environment: production
+    Version: "0.1"
+spec:
+  selector:
+    matchLabels:
+      app: verdaccio
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: verdaccio
+    spec:
+      containers:
+        - image: verdaccio/verdaccio:4.11
+          name: verdaccio
+          ports:
+            - containerPort: 4873
+          resources:
+            limits: 
+              memory: "1G"
+              cpu: "1000m"      

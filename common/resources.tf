@@ -12,7 +12,7 @@ resource "random_string" "suffix" {
 
 module "vpc-sydney" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "2.6.0"
+  version = "3.2.0"
 
   name                 = "training-vpc"
   cidr                 = "10.100.0.0/16"
